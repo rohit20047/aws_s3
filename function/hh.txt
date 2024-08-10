@@ -1,0 +1,105 @@
+// require('dotenv').config()
+// const express = require('express');
+// const path = require('path');
+// const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
+// const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+// const { ListObjectsCommand } = require("@aws-sdk/client-s3");
+
+
+// const BUCKET_NAME = "rapidlynk"; 
+// const app = express();
+// const port = process.env.PORT || 3000;
+
+// const s3Client = new S3Client({
+//     region: "eu-north-1",
+//     credentials: {
+//         accessKeyId: ,
+//         secretAccessKey: ,
+//     }
+// });
+
+// async function getObjectURL(key) {
+//     const command = new GetObjectCommand({
+//         Bucket: "rapidlynk",
+//         Key: key,
+//     });
+//     const url = await getSignedUrl(s3Client, command);
+//     return url;
+// }
+
+// async function putObjectURL(filename) {
+//     console.log('putObjectURL called with filename:', filename);
+//     try {
+//         const command = new PutObjectCommand({
+//             Bucket: "rapidlynk",
+//             Key: `uploads/${filename}`,
+//             ContentType: "application/pdf",
+//         });
+//         console.log('PutObjectCommand created');
+//         const url = await getSignedUrl(s3Client, command);
+//         console.log('Signed URL generated:', url);
+//         return { url, filename };
+//     } catch (error) {
+//         console.error('Error in putObjectURL:', error);
+//         throw error;
+//     }
+// }
+
+
+// // Serve static files from the public directory
+// app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// // API route for generating upload URL
+// app.get('/api/upload-url', async (req, res) => {
+//     const filename = `application-${Date.now()}.pdf`;
+//     try {
+//         console.log('Generating upload URL for:', filename);
+//         const url = await putObjectURL(filename);
+//         console.log('Generated URL:', url);
+//         res.json({ url, filename });
+//     } catch (error) {
+//         console.error('Error generating upload URL:', error);
+//         res.status(500).json({ 
+//             error: 'Failed to generate upload URL', 
+//             details: error.message,
+//             stack: error.stack
+//         });
+//     }
+// });
+
+// // API route for getting view URL
+// app.get('/api/view/:filename', async (req, res) => {
+//     try {
+//         const url = await getObjectURL(`uploads/${req.params.filename}`);
+//         res.json({ url });
+//     } catch (error) {
+//         console.error('Error generating view URL:', error);
+//         res.status(500).json({ error: 'Failed to generate view URL' });
+//     }
+// });
+
+// // Catch-all route to serve the index.html for any unmatched routes
+// app.get('*', (req, res) => {
+//     res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+// });
+
+// app.listen(port, () => {
+//     console.log(`Server running on port ${port}`);
+// });
+
+// async function testS3Connection() {
+//     try {
+//         const command = new ListObjectsCommand({
+//             Bucket: BUCKET_NAME,
+//             MaxKeys: 1
+//         });
+//         const response = await s3Client.send(command);
+//         console.log('Successfully connected to S3 bucket');
+//     } catch (error) {
+//         console.error('Error connecting to S3:', error);
+//     }
+// }
+
+// testS3Connection();
+
+
