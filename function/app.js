@@ -8,7 +8,7 @@ const path = require('path');
 const app = express();
 
 const s3Client = new S3Client({
-    region: "eu-north-1",
+    region: "ap-south-1",
     credentials: {
         accessKeyId: process.env.ACCESSTOKEN,
         secretAccessKey: process.env.SECRETACCESSTOKEN,
@@ -27,22 +27,23 @@ app.post('/upload', upload.single('pdfFile'), async (req, res) => {
     const file = req.file;
 
     if (!file) {
-        return res.status(400).send('No file uploaded.');
+        return res.status(400).json({ error: 'No file uploaded.' });
     }
 
     const s3Params = {
-        Bucket: 'rapidlynk',
+        Bucket: 'rapidlynkzero',
         Key: `uploads/${file.originalname}`,
         Body: file.buffer,
         ContentType: file.mimetype,
     };
 
     try {
-        const data = await s3Client.send(new PutObjectCommand(s3Params));
+        await s3Client.send(new PutObjectCommand(s3Params));
         const fileUrl = `https://${s3Params.Bucket}.s3.amazonaws.com/${s3Params.Key}`;
-        res.send(`File uploaded successfully. Access it here: <a href="${fileUrl}">${fileUrl}</a>`);
+        console.log(fileUrl);
+        res.json({ fileUrl });
     } catch (err) {
-        res.status(500).send(`Error uploading file: ${err.message}`);
+        res.status(500).json({ error: `Error uploading file: ${err.message}` });
     }
 });
 
