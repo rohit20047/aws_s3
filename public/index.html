@@ -31,43 +31,49 @@
     <!-- Main content -->
     <div class="flex flex-col justify-center items-center min-h-screen space-y-4">
         <div id="uploadFormContainer" class="bg-white p-6 rounded-lg shadow-lg">
-          <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
-            <h1 class="text-2xl font-bold text-center mb-6 text-gray-700">Upload a PDF File</h1>
-            <input type="file" name="pdfFile" accept="application/pdf" required class="block w-full text-sm text-gray-500 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button type="submit" class="mt-4 w-full bg-blue-500 text-white font-semibold py-2 rounded-lg hover:bg-blue-600">Upload PDF</button>
-          </form>
+            <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+                <h1 class="text-2xl font-bold text-center mb-6 text-gray-700">Upload a PDF File</h1>
+                <input type="text" name="customFileName" placeholder="Enter file name (without extension)" required class="block w-full text-sm text-gray-500 border border-gray-300 rounded-lg mb-4 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="file" name="pdfFile" accept="application/pdf" required class="block w-full text-sm text-gray-500 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="mt-4 w-full bg-blue-500 text-white font-semibold py-2 rounded-lg hover:bg-blue-600">Upload PDF</button>
+              </form>
         </div>
         <div id="fileLink" class="text-center">
           <!-- Link will be dynamically inserted here -->
+          
         </div>
+        <button onclick="navigator.clipboard.writeText('${shareText}')">Copy Share Text</button>
       </div>
       
     
 
     <!-- JavaScript to handle form submission and display the link -->
     <script>
-        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
+     document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
 
-            const formData = new FormData(this);
-            try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                // Get raw text from the response
-                const text = await response.json();
-                
-
-                if (response.ok) {
-                    // Update the fileLink div with the link and ensure it opens in a new tab with added styling
-                    document.getElementById('fileLink').innerHTML = `<a href="${text.fileUrl}" target="_blank" class="text-blue-500 underline">${text.fileUrl}</a>`;
-                } 
-            } catch (fetchError) {
-                document.getElementById('fileLink').textContent = `Fetch error: ${fetchError.message}`;
-            }
+    const formData = new FormData(this);
+    try {
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
         });
+
+        const text = await response.json();
+
+        if (response.ok) {
+            const customFileName = formData.get('customFileName');
+            const shareText = `Check out this file: ${customFileName}.pdf\n${text.fileUrl}`;
+            document.getElementById('fileLink').innerHTML = `
+                <a href="${text.fileUrl}" target="_blank" class="text-blue-500 underline">${text.fileUrl}</a>
+                <br><br>`;
+        }
+
+    } catch (fetchError) {
+        document.getElementById('fileLink').textContent = `Fetch error: ${fetchError.message}`;
+    }
+});
+
     </script>
 
 </body>

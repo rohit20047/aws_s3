@@ -25,14 +25,19 @@ app.use(express.static('public'));
 // Handle file upload and upload to S3
 app.post('/upload', upload.single('pdfFile'), async (req, res) => {
     const file = req.file;
+    const customFileName = req.body.customFileName;
 
     if (!file) {
         return res.status(400).json({ error: 'No file uploaded.' });
     }
 
+    if (!customFileName) {
+        return res.status(400).json({ error: 'No custom file name provided.' });
+    }
+
     const s3Params = {
         Bucket: 'rapidlynkzero',
-        Key: `uploads/${file.originalname}`,
+        Key: `uploads/${customFileName}.pdf`,
         Body: file.buffer,
         ContentType: file.mimetype,
     };
@@ -46,6 +51,7 @@ app.post('/upload', upload.single('pdfFile'), async (req, res) => {
         res.status(500).json({ error: `Error uploading file: ${err.message}` });
     }
 });
+
 
 app.listen(3000, () => {
     console.log('Server running on http://localhost:3000');
