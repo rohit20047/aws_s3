@@ -17,7 +17,7 @@
                     <img src="image/logo.png" alt="Logo" class="h-16 w-8/12">
                     <span class="font-semibold text-xl text-gray-800 ml-2">rapidLYNK</span>
                 </div>
-                
+               
                 <!-- Navigation Links -->
                 <div class="hidden md:flex space-x-20 ml-24">
                     <a href="#" class="text-gray-800 hover:text-blue-600">How to Use</a>
@@ -27,53 +27,61 @@
             </div>
         </div>
     </nav>
-    
+   
     <!-- Main content -->
     <div class="flex flex-col justify-center items-center min-h-screen space-y-4">
         <div id="uploadFormContainer" class="bg-white p-6 rounded-lg shadow-lg">
-            <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+            <form id="uploadForm" action="/.netlify/functions/app" method="POST" enctype="multipart/form-data">
                 <h1 class="text-2xl font-bold text-center mb-6 text-gray-700">Upload a PDF File</h1>
                 <input type="text" name="customFileName" placeholder="Enter file name (without extension)" required class="block w-full text-sm text-gray-500 border border-gray-300 rounded-lg mb-4 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <input type="file" name="pdfFile" accept="application/pdf" required class="block w-full text-sm text-gray-500 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <button type="submit" class="mt-4 w-full bg-blue-500 text-white font-semibold py-2 rounded-lg hover:bg-blue-600">Upload PDF</button>
-              </form>
+            </form>
         </div>
         <div id="fileLink" class="text-center">
-          <!-- Link will be dynamically inserted here -->
-          
+            <!-- Link will be dynamically inserted here -->
         </div>
-        <button onclick="navigator.clipboard.writeText('${shareText}')">Copy Share Text</button>
-      </div>
-      
-    
+    </div>
 
     <!-- JavaScript to handle form submission and display the link -->
     <script>
-     document.getElementById('uploadForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
+    document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
 
-    const formData = new FormData(this);
-    try {
-        const response = await fetch('/upload', {
-            method: 'POST',
-            body: formData
-        });
+        const formData = new FormData(this);
+        const customFileName = formData.get('customFileName');
+        const file = formData.get('pdfFile');
 
-        const text = await response.json();
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const fileBuffer = e.target.result;
+            try {
+                const response = await fetch('/.netlify/functions/app', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        customFileName,
+                        fileBuffer: Array.from(new Uint8Array(fileBuffer)),
+                        fileType: file.type
+                    })
+                });
 
-        if (response.ok) {
-            const customFileName = formData.get('customFileName');
-            const shareText = `Check out this file: ${customFileName}.pdf\n${text.fileUrl}`;
-            document.getElementById('fileLink').innerHTML = `
-                <a href="${text.fileUrl}" target="_blank" class="text-blue-500 underline">${text.fileUrl}</a>
-                <br><br>`;
-        }
+                const data = await response.json();
 
-    } catch (fetchError) {
-        document.getElementById('fileLink').textContent = `Fetch error: ${fetchError.message}`;
-    }
-});
-
+                if (response.ok) {
+                    const shareText = `Check out this file: ${customFileName}.pdf\n${data.fileUrl}`;
+                    document.getElementById('fileLink').innerHTML = `
+                        <a href="${data.fileUrl}" target="_blank" class="text-blue-500 underline">${data.fileUrl}</a>
+                        <br><br>
+                        <button onclick="navigator.clipboard.writeText('${shareText}')" class="mt-2 bg-green-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-green-600">Copy Share Text</button>`;
+                } else {
+                    throw new Error(data.error || 'Unknown error occurred');
+                }
+            } catch (fetchError) {
+                document.getElementById('fileLink').textContent = `Error: ${fetchError.message}`;
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
     </script>
 
 </body>
