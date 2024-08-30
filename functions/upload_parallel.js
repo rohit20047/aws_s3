@@ -6,7 +6,7 @@ const process = require("process");
 
 // Set up AWS S3 bucket configuration
 const s3 = new S3Client({
-  region: process.env.YOUR_BUCKET_REGION,
+  region: "ap-south-1",
   credentials: {
     accessKeyId: process.env.YOUR_ACCESS_KEY,
     secretAccessKey: process.env.YOUR_SECRET_KEY,
@@ -14,7 +14,7 @@ const s3 = new S3Client({
   useAccelerateEndpoint: true,
 });
 
-const bucketName = process.env.YOUR_BUCKET_NAME;
+const bucketName = 'rapidlynkzero';
 
 exports.handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
