@@ -1,7 +1,13 @@
-[build]
-  functions = "functions"
-  publish = "public"
+# Netlify configuration file
 
+[build]
+ 
+  publish = "dist" 
+  functions = "functions"
+
+
+
+# Redirect rules to handle Single Page Applications (SPA)
 [[redirects]]
   from = "/*"
   to = "/index.html"
